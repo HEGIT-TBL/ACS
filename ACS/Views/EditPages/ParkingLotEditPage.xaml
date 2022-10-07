@@ -1,0 +1,153 @@
+﻿<Page
+    x:Class="ACS.Views.EditPages.ParkingLotEditPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:EnumAlias="clr-namespace:ACS.Core.Models.Enums;assembly=ACS.Core"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:coverters="clr-namespace:ACS.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="AccessPointEditPage"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    Style="{DynamicResource MahApps.Styles.Page}"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <ObjectDataProvider
+            x:Key="DataFromEnum"
+            MethodName="GetValues"
+            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="EnumAlias:ParkingLotState" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <coverters:EnumToStringConverter x:Key="EnumToStringConverter" />
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="48" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80*" />
+                <ColumnDefinition Width="60px" />
+                <ColumnDefinition Width="60px" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Margin="{StaticResource MediumLeftMargin}"
+                Style="{StaticResource PageTitleStyle}"
+                Text="{Binding Path=ParkingLotPageTitle, Source={StaticResource Resources}}" />
+            <Button
+                x:Name="EditButton"
+                Grid.Column="1"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0,0,0,0"
+                Click="EditButton_Click"
+                RenderTransformOrigin="0.5,0.5">
+                <Button.RenderTransform>
+                    <ScaleTransform ScaleX="-1" />
+                </Button.RenderTransform>
+                <Button.Content>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe MDL2 Assets"
+                        FontSize="20"
+                        Text="&#xEB7E;" />
+                </Button.Content>
+            </Button>
+            <Button
+                x:Name="DeleteButton"
+                Grid.Column="2"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0,0,0,0"
+                Click="DeleteButton_Click">
+                <Button.Content>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe MDL2 Assets"
+                        FontSize="20"
+                        Text="&#xE74D;" />
+                </Button.Content>
+            </Button>
+        </Grid>
+        <Grid Grid.Row="1">
+            <StackPanel Margin="{StaticResource MediumLeftTopMargin}">
+                <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Номер парковочного места" />
+                <TextBox
+                    x:Name="LotNumberTextBox"
+                    Width="400"
+                    Margin="{StaticResource SmallTopBottomMargin}"
+                    HorizontalAlignment="Left"
+                    IsReadOnly="True"
+                    Text="{Binding Item.LotNumber}" />
+                <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Состояние" />
+                <ComboBox
+                    x:Name="StateCombobox"
+                    Width="100"
+                    Margin="{StaticResource SmallTopBottomMargin}"
+                    HorizontalAlignment="Left"
+                    d:ItemsSource="{Binding Source={StaticResource DataFromEnum}, Converter={StaticResource EnumToStringConverter}}"
+                    Background="Transparent"
+                    IsEnabled="False"
+                    ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
+                    SelectedItem="{Binding Item.State}" />
+                <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Автомобиль (если место занято)" />
+                <Expander
+                    x:Name="CarsListRadio"
+                    Width="400"
+                    Margin="{StaticResource SmallTopBottomMargin}"
+                    HorizontalAlignment="Left"
+                    Header="Список автомобилей"
+                    IsEnabled="False">
+                    <ListBox Width="400" HorizontalAlignment="Left">
+                        <ItemsControl ItemsSource="{Binding AvailableCars}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <RadioButton
+                                        Margin="{StaticResource SmallRightMargin}"
+                                        Content="{Binding Car.CarNumberPlate}"
+                                        GroupName="Radios"
+                                        IsChecked="{Binding IsChecked}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ListBox>
+                </Expander>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Button
+                    Margin="{StaticResource MediumLeftRightBottomMargin}"
+                    Padding="0"
+                    BorderThickness="0,0,0,0"
+                    Click="CancelButton_Click"
+                    Content="Отменить" />
+            </Grid>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Separator Margin="{StaticResource SmallBottomMargin}" Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
+            </StackPanel>
+            <Grid Grid.Column="2">
+                <Button
+                    x:Name="SaveChangesButton"
+                    Margin="{StaticResource MediumLeftRightBottomMargin}"
+                    Padding="0"
+                    BorderThickness="0,0,0,0"
+                    Click="SaveChangesButton_Click"
+                    Content="Сохранить изменения"
+                    IsEnabled="False" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>
