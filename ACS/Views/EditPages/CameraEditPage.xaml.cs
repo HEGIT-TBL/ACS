@@ -2,6 +2,7 @@
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,8 +17,8 @@ namespace ACS.Views.EditPages
 {
     public partial class CameraEditPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<AccessPoint> _apRepository;
-        private readonly IGenericRepositoryAsync<Camera> _cameracRepository;
+        private readonly GenericAPIPoster<AccessPoint> _apAPIPoster;
+        private readonly GenericAPIPoster<Camera> _cameracAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
@@ -65,15 +66,15 @@ namespace ACS.Views.EditPages
         }
         private Camera _itemOrigin;
 
-        public CameraEditPage(IGenericRepositoryAsync<AccessPoint> apRepository, IGenericRepositoryAsync<Camera> cameraRepository, INavigationService navigationService)
+        public CameraEditPage(GenericAPIPoster<AccessPoint> apAPIPoster, GenericAPIPoster<Camera> cameraAPIPoster, INavigationService navigationService)
         {
             InitializeComponent();
             DataContext = this;
             Item = new Camera();
             ItemOrigin = null;
             AvailableAccessPoints = new ObservableCollection<CheckableAccessPoint>();
-            _apRepository = apRepository;
-            _cameracRepository = cameraRepository;
+            _apAPIPoster = apAPIPoster;
+            _cameracAPIPoster = cameraAPIPoster;
             _navigationService = navigationService;
             _cts = new CancellationTokenSource().Token;
         }
@@ -91,7 +92,7 @@ namespace ACS.Views.EditPages
                 DeleteButton.Visibility = Visibility.Hidden;
                 SwitchFieldsIsEnabled();
             }
-            AvailableAccessPoints = new ObservableCollection<CheckableAccessPoint>((await _apRepository.GetAllAsync(_cts))
+            AvailableAccessPoints = new ObservableCollection<CheckableAccessPoint>((await _apAPIPoster.GetAllAsync(_cts))
                 .Select(ap => new CheckableAccessPoint(ap, Item.AccessPoint != null && Item.AccessPoint.Id == ap.Id)));
         }
 
@@ -127,7 +128,7 @@ namespace ACS.Views.EditPages
             //track current entity
             if (ItemOrigin != null)
             {
-                Item = await _cameracRepository.GetOneAsync(Item.Id, _cts);
+                Item = await _cameracAPIPoster.GetOneAsync(Item.Id, _cts);
             }
             var ap = AvailableAccessPoints.FirstOrDefault(ap => ap.IsChecked)?.AccessPoint;
             if (ap != null
@@ -144,9 +145,9 @@ namespace ACS.Views.EditPages
             }
             else
             {
-                _cameracRepository.Attach(Item);
+                _cameracAPIPoster.Attach(Item);
             }
-            await _cameracRepository.SaveChangesAsync(_cts);
+            await _cameracAPIPoster.SaveChangesAsync(_cts);
             _navigationService.GoBack();
         }
 
@@ -167,8 +168,8 @@ namespace ACS.Views.EditPages
         {
             if (MessageBox.Show("You sure you want to delete this?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                await _cameracRepository.DeleteAsync(ItemOrigin.Id, _cts);
-                await _cameracRepository.SaveChangesAsync(_cts);
+                await _cameracAPIPoster.DeleteAsync(ItemOrigin.Id, _cts);
+                await _cameracAPIPoster.SaveChangesAsync(_cts);
                 _navigationService.GoBack();
             }
         }

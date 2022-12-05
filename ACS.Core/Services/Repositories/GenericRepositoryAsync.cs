@@ -17,9 +17,9 @@ namespace ACS.Core.Services.Repositories
         public AccessControlDbContext Context { get; }
         protected readonly DbSet<TEntity> _dbSet;
 
-        public GenericRepositoryAsync(AccessControlDbContext context)
+        public GenericRepositoryAsync(IDbContextFactory<AccessControlDbContext> contextFactory)
         {
-            Context = context;
+            Context = contextFactory.CreateDbContext();
             _dbSet = Context.Set<TEntity>();
         }
 
@@ -63,11 +63,16 @@ namespace ACS.Core.Services.Repositories
 
         public virtual void Update(TEntity otherItem)
         {
+            Context.ChangeTracker.Clear();
             _dbSet.Update(otherItem);
         }
 
         public async Task SaveChangesAsync(CancellationToken cancellationToken)
         {
+            if(!Context.ChangeTracker.HasChanges())
+            {
+                Console.WriteLine("Bullshit");
+            }
             await Context.SaveChangesAsync(cancellationToken);
         }
 
@@ -207,7 +212,7 @@ namespace ACS.Core.Services.Repositories
         //            ////right ver from stackovflw
         //            //if (isCollection)
         //            //{
-        //            //    var entry = context.Entry(entity);
+        //            //    var entry = contextFactory.Entry(entity);
 
         //            //    if (entry.Member(propertyInfo.Name) as CollectionEntry == null)
         //            //        continue;
@@ -219,11 +224,11 @@ namespace ACS.Core.Services.Repositories
         //            //    if (propertyValue == null)
         //            //        continue;
 
-        //            //    EnumerateAllIncludesList(context, (IEnumerable)propertyValue, entitiesLoaded);
+        //            //    EnumerateAllIncludesList(contextFactory, (IEnumerable)propertyValue, entitiesLoaded);
         //            //}
         //            //else if (!propertyType.IsValueType && !propertyType.Equals(typeof(string)))
         //            //{
-        //            //    var entry = context.Entry(entity);
+        //            //    var entry = contextFactory.Entry(entity);
 
         //            //    if (entry.Member(propertyInfo.Name) as ReferenceEntry == null)
         //            //        continue;
@@ -235,7 +240,7 @@ namespace ACS.Core.Services.Repositories
         //            //    if (propertyValue == null)
         //            //        continue;
 
-        //            //    EnumerateAllIncludesEntity(context, propertyValue, entitiesLoaded);
+        //            //    EnumerateAllIncludesEntity(contextFactory, propertyValue, entitiesLoaded);
         //            //}
         //            //else
         //            //{

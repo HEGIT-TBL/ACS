@@ -3,6 +3,7 @@ using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
 using ACS.Core.Models.Enums;
+using ACS.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -17,8 +18,8 @@ namespace ACS.Views.EditPages
 {
     public partial class ParkingLotEditPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<ParkingLot> _plRepository;
-        private readonly IGenericRepositoryAsync<Car> _carRepository;
+        private readonly GenericAPIPoster<ParkingLot> _plAPIPoster;
+        private readonly GenericAPIPoster<Car> _carAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
@@ -66,7 +67,7 @@ namespace ACS.Views.EditPages
         }
         private ParkingLot _itemOrigin;
 
-        public ParkingLotEditPage(IGenericRepositoryAsync<ParkingLot> plRepository, IGenericRepositoryAsync<Car> carRepository, INavigationService navigationService)
+        public ParkingLotEditPage(GenericAPIPoster<ParkingLot> plAPIPoster, GenericAPIPoster<Car> carAPIPoster, INavigationService navigationService)
         {
             InitializeComponent();
             DataContext = this;
@@ -76,8 +77,8 @@ namespace ACS.Views.EditPages
             };
             ItemOrigin = null;
             AvailableCars = new ObservableCollection<CheckableCar>();
-            _plRepository = plRepository;
-            _carRepository = carRepository;
+            _plAPIPoster = plAPIPoster;
+            _carAPIPoster = carAPIPoster;
             _navigationService = navigationService;
             _cts = new CancellationTokenSource().Token;
         }
@@ -95,9 +96,13 @@ namespace ACS.Views.EditPages
                 DeleteButton.Visibility = Visibility.Hidden;
                 SwitchFieldsIsEnabled();
             }
-            var pls = await _plRepository.GetAllAsync(_cts);
-            AvailableCars = new ObservableCollection<CheckableCar>((await _carRepository.GetAllAsync(_cts))
-                .Where(c => pls.Select(pl => pl?.PlacedCar).Where(plc => plc != null).All(plc => plc.Id != c.Id))
+            var pls = await _plAPIPoster.GetAllAsync(_cts);
+            var cars = await _carAPIPoster.GetAllAsync(_cts);
+            AvailableCars = new ObservableCollection<CheckableCar>(cars
+                .Where(c => pls
+                    .Select(pl => pl?.PlacedCar)
+                    .Where(plc => plc != null)
+                    .All(plc => plc.Id != c.Id))
                 .Select(c => new CheckableCar(c, Item.PlacedCar != null && Item.PlacedCar.Id == c.Id)));
         }
 
@@ -133,7 +138,7 @@ namespace ACS.Views.EditPages
             //track current entity
             if (ItemOrigin != null)
             {
-                Item = await _plRepository.GetOneAsync(Item.Id, _cts);
+                Item = await _plAPIPoster.GetOneAsync(Item.Id, _cts);
             }
 
             if (itemChanges.State == ParkingLotState.Empty || itemChanges.State == ParkingLotState.Maintainance)
@@ -155,13 +160,13 @@ namespace ACS.Views.EditPages
                 //update other fields
                 Item.LotNumber = itemChanges.LotNumber;
                 Item.State = itemChanges.State;
-                _plRepository.Update(Item);
+                _plAPIPoster.Update(Item);
             }
             else
             {
-                _plRepository.Attach(Item);
+                _plAPIPoster.Attach(Item);
             }
-            await _plRepository.SaveChangesAsync(_cts);
+            await _plAPIPoster.SaveChangesAsync(_cts);
             _navigationService.GoBack();
         }
 
@@ -182,8 +187,8 @@ namespace ACS.Views.EditPages
         {
             if (MessageBox.Show("You sure you want to delete this?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                await _plRepository.DeleteAsync(ItemOrigin.Id, _cts);
-                await _plRepository.SaveChangesAsync(_cts);
+                await _plAPIPoster.DeleteAsync(ItemOrigin.Id, _cts);
+                await _plAPIPoster.SaveChangesAsync(_cts);
                 _navigationService.GoBack();
             }
         }

@@ -11,7 +11,7 @@ namespace ACS.Core.Services.Repositories
 {
     public class AccessPointRepository : GenericRepositoryAsync<AccessPoint>
     {
-        public AccessPointRepository(AccessControlDbContext context) : base(context)
+        public AccessPointRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

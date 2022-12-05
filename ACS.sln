@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ACS", "ACS\ACS.csproj", "{7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ACS.Core", "ACS.Core\ACS.Core.csproj", "{410D916E-9582-43A9-A864-86C6B5F9E6AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACS.WebAPI", "ACS.WebAPI\ACS.WebAPI.csproj", "{61604C69-F4BE-43F2-998C-3ECC06672F89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{410D916E-9582-43A9-A864-86C6B5F9E6AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{410D916E-9582-43A9-A864-86C6B5F9E6AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{410D916E-9582-43A9-A864-86C6B5F9E6AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61604C69-F4BE-43F2-998C-3ECC06672F89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61604C69-F4BE-43F2-998C-3ECC06672F89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61604C69-F4BE-43F2-998C-3ECC06672F89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61604C69-F4BE-43F2-998C-3ECC06672F89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,22 +5,24 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Controls;
-
 using ACS.Contracts.Views;
-using ACS.Core.Contracts.Services;
 using ACS.Core.Data;
 using ACS.Core.Models;
 using ACS.Core.Models.Events;
+using ACS.Services;
 
 namespace ACS.Views
 {
     public partial class EventsPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<AccessEvent> _aeRepository;
-        private readonly IGenericRepositoryAsync<ParkingLotStateChangedEvent> _pleRepository;
-        private readonly IGenericRepositoryAsync<FaceRecognizedEvent> _freRepository;
+        private readonly GenericAPIPoster<AccessEvent> _aeAPIPoster;
+        private readonly GenericAPIPoster<AccessPoint> _apAPIPoster;
+        private readonly GenericAPIPoster<User> _userAPIPoster;
+        private readonly GenericAPIPoster<Camera> _cameraAPIPoster;
+        private readonly GenericAPIPoster<ParkingLotStateChangedEvent> _pleAPIPoster;
+        private readonly GenericAPIPoster<FaceRecognizedEvent> _freAPIPoster;
+        private readonly GenericAPIPoster<ParkingLot> _plAPIPoster;
         private readonly CancellationToken _ct;
-        private readonly AccessControlDbContext _context;
 
         public class EventInfo
         {
@@ -35,14 +37,13 @@ namespace ACS.Views
 
         public ObservableCollection<EventInfo> Source { get; } = new ObservableCollection<EventInfo>();
 
-        public EventsPage(IGenericRepositoryAsync<AccessEvent> accessEventRepository,
-                          IGenericRepositoryAsync<ParkingLotStateChangedEvent> parkingLotStateChangedRepository,
-                          IGenericRepositoryAsync<FaceRecognizedEvent> faceRecognizedEventRepository)
+        public EventsPage(GenericAPIPoster<AccessEvent> accessEventAPIPoster,
+                          GenericAPIPoster<ParkingLotStateChangedEvent> parkingLotStateChangedAPIPoster,
+                          GenericAPIPoster<FaceRecognizedEvent> faceRecognizedEventAPIPoster)
         {
-            _aeRepository = accessEventRepository;
-            _pleRepository = parkingLotStateChangedRepository;
-            _freRepository = faceRecognizedEventRepository;
-            _context = _aeRepository.Context;
+            _aeAPIPoster = accessEventAPIPoster;
+            _pleAPIPoster = parkingLotStateChangedAPIPoster;
+            _freAPIPoster = faceRecognizedEventAPIPoster;
             _ct = new CancellationTokenSource().Token;
             InitializeComponent();
             DataContext = this;
@@ -51,57 +52,57 @@ namespace ACS.Views
         public async void OnNavigatedTo(object parameter)
         {
             Source.Clear();
-            if (!_context.AccessEvents.Any())
+            if (!(await _aeAPIPoster.GetAllAsync(_ct)).Any())
             {
-                _aeRepository.Attach(new AccessEvent()
+                _aeAPIPoster.Attach(new AccessEvent()
                 {
                     AccessTime = DateTime.UtcNow.AddMinutes(5).AddSeconds(10),
-                    User = _context.Users.First(),
-                    AccessPoint = _context.AccessPoints.First(),
+                    User = (await _userAPIPoster.GetAllAsync(_ct)).First(),
+                    AccessPoint = (await _apAPIPoster.GetAllAsync(_ct)).First(),
                     IsPermissionGranted = true,
                 });
-                _aeRepository.Attach(new AccessEvent()
+                _aeAPIPoster.Attach(new AccessEvent()
                 {
                     AccessTime = DateTime.UtcNow.AddHours(12).AddSeconds(9),
-                    User = _context.Users.First(),
-                    AccessPoint = _context.AccessPoints.Skip(1).First(),
+                    User = (await _userAPIPoster.GetAllAsync(_ct)).First(),
+                    AccessPoint = (await _apAPIPoster.GetAllAsync(_ct)).Skip(1).First(),
                     IsPermissionGranted = true,
                 });
             }
-            if (!_context.FaceRecognizedEvents.Any())
+            if (!(await _freAPIPoster.GetAllAsync(_ct)).Any())
             {
-                _freRepository.Attach(new FaceRecognizedEvent()
+                _freAPIPoster.Attach(new FaceRecognizedEvent()
                 {
                     CaptureTime = DateTime.UtcNow.AddMinutes(5),
-                    Camera = _context.Cameras.First(),
+                    Camera = (await _cameraAPIPoster.GetAllAsync(_ct)).First(),
                     Probability = 0.8,
-                    RecognizedUser = _context.Users.First(),
+                    RecognizedUser = (await _userAPIPoster.GetAllAsync(_ct)).First(),
                 });
-                _freRepository.Attach(new FaceRecognizedEvent()
+                _freAPIPoster.Attach(new FaceRecognizedEvent()
                 {
                     CaptureTime = DateTime.UtcNow.AddHours(12),
-                    Camera = _context.Cameras.Skip(1).First(),
+                    Camera = (await _cameraAPIPoster.GetAllAsync(_ct)).Skip(1).First(),
                     Probability = 0.8,
-                    RecognizedUser = _context.Users.First(),
+                    RecognizedUser = (await _userAPIPoster.GetAllAsync(_ct)).First(),
                 });
             }
-            if (!_context.ParkingLotStateChangedEvents.Any())
+            if (!(await _pleAPIPoster.GetAllAsync(_ct)).Any())
             {
-                _pleRepository.Attach(new ParkingLotStateChangedEvent()
+                _pleAPIPoster.Attach(new ParkingLotStateChangedEvent()
                 {
                     StateChangeTime = DateTime.UtcNow,
-                    ChangedLot = _context.ParkingLots.First(),
+                    ChangedLot = (await _plAPIPoster.GetAllAsync(_ct)).First(),
                 });
-                _pleRepository.Attach(new ParkingLotStateChangedEvent()
+                _pleAPIPoster.Attach(new ParkingLotStateChangedEvent()
                 {
                     StateChangeTime = DateTime.UtcNow.AddMinutes(5).AddHours(12).AddSeconds(9),
-                    ChangedLot = _context.ParkingLots.First(),
+                    ChangedLot = (await _plAPIPoster.GetAllAsync(_ct)).First(),
                 });
             }
-            await _context.SaveChangesAsync(_ct);
-            var accessEvents = await _aeRepository.GetAllAsync(_ct);
-            var parkingLotEvents = await _pleRepository.GetAllAsync(_ct);
-            var faceRecognitionEvents = await _freRepository.GetAllAsync(_ct);
+            await _aeAPIPoster.SaveChangesAsync(_ct);
+            var accessEvents = await _aeAPIPoster.GetAllAsync(_ct);
+            var parkingLotEvents = await _pleAPIPoster.GetAllAsync(_ct);
+            var faceRecognitionEvents = await _freAPIPoster.GetAllAsync(_ct);
             //put to resx mb
             var aes = accessEvents.Select(ae => new EventInfo
                 (ae.AccessTime, $"{ae.User.Surname} {ae.User.Name} {ae.User.Patronymic} запросил проход через {ae.AccessPoint.Location}. Допущен? {ae.IsPermissionGranted}"));

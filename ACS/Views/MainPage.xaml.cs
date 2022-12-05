@@ -2,6 +2,7 @@
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
 using ACS.Core.Services;
+using ACS.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,15 +15,15 @@ namespace ACS.Views
 {
     public partial class MainPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<AccessPoint> _apRepository;
-        private readonly IGenericRepositoryAsync<KeyCard> _kcRepository;
+        private readonly GenericAPIPoster<AccessPoint> _apAPIPoster;
+        private readonly GenericAPIPoster<KeyCard> _kcAPIPoster;
 
-        public MainPage(IGenericRepositoryAsync<AccessPoint> apRepository, IGenericRepositoryAsync<KeyCard> kcRepository)
+        public MainPage(GenericAPIPoster<AccessPoint> apAPIPoster, GenericAPIPoster<KeyCard> kcAPIPoster)
         {
             InitializeComponent();
             DataContext = this;
-            _apRepository = apRepository;
-            _kcRepository = kcRepository;
+            _apAPIPoster = apAPIPoster;
+            _kcAPIPoster = kcAPIPoster;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -42,7 +43,7 @@ namespace ACS.Views
 
         public async void OnNavigatedTo(object parameter)
         {
-            //var ap = await _userRepository.GetOneAsync(new Guid("210c5f8d-b736-4156-ab07-7607cf0ca908"), CancellationToken.None);
+            //var ap = await _userAPIPoster.GetOneAsync(new Guid("210c5f8d-b736-4156-ab07-7607cf0ca908"), CancellationToken.None);
             //var e = new KeyCard()
             //{
             //    Key = "1234",
@@ -50,9 +51,9 @@ namespace ACS.Views
             //    AvailableAccessPoints = new List<AccessPoint>()
             //};
             ////e.AvailableAccessPoints.Add(ap);
-            //await _camerasRepository.CreateAsync(e, CancellationToken.None);
+            //await _camerasAPIPoster.CreateAsync(e, CancellationToken.None);
             //ap.AllowedKeyCards.Add(e);
-            //await _userRepository.SaveChangesAsync(CancellationToken.None);
+            //await _userAPIPoster.SaveChangesAsync(CancellationToken.None);
 
         }
 

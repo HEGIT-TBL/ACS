@@ -14,7 +14,7 @@ namespace ACS.Core.Services.Repositories
 {
     public class UserRepository : GenericRepositoryAsync<User>
     {
-        public UserRepository(AccessControlDbContext context) : base(context)
+        public UserRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

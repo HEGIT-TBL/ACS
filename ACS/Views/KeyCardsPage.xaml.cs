@@ -8,23 +8,24 @@ using ACS.Contracts.Services;
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using ACS.Views.EditPages;
 
 namespace ACS.Views
 {
     public partial class KeyCardsPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<KeyCard> _kcRepository;
+        private readonly GenericAPIPoster<KeyCard> _kcAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
         public ObservableCollection<KeyCard> Source { get; } = new ObservableCollection<KeyCard>();
 
 
-        public KeyCardsPage(IGenericRepositoryAsync<KeyCard> kcRepository, INavigationService navigationService)
+        public KeyCardsPage(GenericAPIPoster<KeyCard> kcAPIPoster, INavigationService navigationService)
         {
             _cts = new CancellationTokenSource().Token;
-            _kcRepository = kcRepository;
+            _kcAPIPoster = kcAPIPoster;
             _navigationService = navigationService;
             InitializeComponent();
             DataContext = this;
@@ -34,7 +35,7 @@ namespace ACS.Views
         {
             Source.Clear();
 
-            var data = await _kcRepository.GetAllAsync(_cts);
+            var data = await _kcAPIPoster.GetAllAsync(_cts);
 
             foreach (var item in data)
             {

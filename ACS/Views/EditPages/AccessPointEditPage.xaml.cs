@@ -2,6 +2,7 @@
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,8 +16,8 @@ namespace ACS.Views.EditPages
 {
     public partial class AccessPointEditPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<AccessPoint> _apRepository;
-        private readonly IGenericRepositoryAsync<KeyCard> _kcRepository;
+        private readonly GenericAPIPoster<AccessPoint> _apAPIPoster;
+        private readonly GenericAPIPoster<KeyCard> _kcAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
@@ -64,7 +65,7 @@ namespace ACS.Views.EditPages
         }
         private AccessPoint _itemOrigin;
 
-        public AccessPointEditPage(IGenericRepositoryAsync<AccessPoint> apRepository, IGenericRepositoryAsync<KeyCard> kcRepository, INavigationService navigationService)
+        public AccessPointEditPage(GenericAPIPoster<AccessPoint> apAPIPoster, GenericAPIPoster<KeyCard> kcAPIPoster, INavigationService navigationService)
         {
             InitializeComponent();
             DataContext = this;
@@ -74,8 +75,8 @@ namespace ACS.Views.EditPages
             };
             ItemOrigin = null;
             CheckableKeyCards = new ObservableCollection<CheckableKeyCard>();
-            _apRepository = apRepository;
-            _kcRepository = kcRepository;
+            _apAPIPoster = apAPIPoster;
+            _kcAPIPoster = kcAPIPoster;
             _navigationService = navigationService;
             _cts = new CancellationTokenSource().Token;
         }
@@ -93,7 +94,7 @@ namespace ACS.Views.EditPages
                 DeleteButton.Visibility = Visibility.Hidden;
                 SwitchFieldsIsEnabled();
             }
-            CheckableKeyCards = new ObservableCollection<CheckableKeyCard>((await _kcRepository.GetAllAsync(_cts))
+            CheckableKeyCards = new ObservableCollection<CheckableKeyCard>((await _kcAPIPoster.GetAllAsync(_cts))
                 .Select(kc => new CheckableKeyCard(kc, Item.AllowedKeyCards.Any(kci => kci.Id == kc.Id))));
         }
 
@@ -129,7 +130,7 @@ namespace ACS.Views.EditPages
             //track current entity
             if (ItemOrigin != null)
             {
-                Item = await _apRepository.GetOneAsync(Item.Id, _cts);
+                Item = await _apAPIPoster.GetOneAsync(Item.Id, _cts);
             }
 
             //mb liqwify but DON"T TOUCH
@@ -164,9 +165,9 @@ namespace ACS.Views.EditPages
             }
             else
             {
-                _apRepository.Attach(Item);
+                _apAPIPoster.Attach(Item);
             }
-            await _apRepository.SaveChangesAsync(_cts);
+            await _apAPIPoster.SaveChangesAsync(_cts);
             _navigationService.GoBack();
         }
 
@@ -188,8 +189,8 @@ namespace ACS.Views.EditPages
         {
             if (MessageBox.Show("You sure you want to delete this?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                await _apRepository.DeleteAsync(ItemOrigin.Id, _cts);
-                await _apRepository.SaveChangesAsync(_cts);
+                await _apAPIPoster.DeleteAsync(ItemOrigin.Id, _cts);
+                await _apAPIPoster.SaveChangesAsync(_cts);
                 _navigationService.GoBack();
             }
         }

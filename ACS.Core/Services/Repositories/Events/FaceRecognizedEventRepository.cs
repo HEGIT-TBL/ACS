@@ -10,7 +10,7 @@ namespace ACS.Core.Services.Repositories.Events
 {
     public class FaceRecognizedEventRepository : GenericRepositoryAsync<FaceRecognizedEvent>
     {
-        public FaceRecognizedEventRepository(AccessControlDbContext context) : base(context)
+        public FaceRecognizedEventRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

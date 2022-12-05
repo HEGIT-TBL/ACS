@@ -8,25 +8,26 @@ using ACS.Contracts.Services;
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using ACS.Views.EditPages;
 
 namespace ACS.Views
 {
     public partial class ParkingLotPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<ParkingLot> _plRepository;
+        private readonly GenericAPIPoster<ParkingLot> _plAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
         public ObservableCollection<ParkingLot> Source { get; } = new ObservableCollection<ParkingLot>();
 
-        public ParkingLotPage(INavigationService navigationService, IGenericRepositoryAsync<ParkingLot> plRepository)
+        public ParkingLotPage(INavigationService navigationService, GenericAPIPoster<ParkingLot> plAPIPoster)
         {
             InitializeComponent();
             DataContext = this;
             _cts = new CancellationTokenSource().Token;
             _navigationService = navigationService;
-            _plRepository = plRepository;
+            _plAPIPoster = plAPIPoster;
         }
 
         public async void OnNavigatedTo(object parameter)
@@ -34,7 +35,7 @@ namespace ACS.Views
             Source.Clear();
 
             // Replace this with your actual data
-            var data = await _plRepository.GetAllAsync(_cts);
+            var data = await _plAPIPoster.GetAllAsync(_cts);
 
             foreach (var item in data)
             {

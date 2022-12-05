@@ -2,6 +2,7 @@
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,8 +17,8 @@ namespace ACS.Views.EditPages
 {
     public partial class KeyCardEditPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<KeyCard> _kcRepository;
-        private readonly IGenericRepositoryAsync<AccessPoint> _apRepository;
+        private readonly GenericAPIPoster<KeyCard> _kcAPIPoster;
+        private readonly GenericAPIPoster<AccessPoint> _apAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
@@ -43,7 +44,7 @@ namespace ACS.Views.EditPages
         }
         private KeyCard _itemOrigin;
 
-        public KeyCardEditPage(IGenericRepositoryAsync<KeyCard> kcRepository, IGenericRepositoryAsync<AccessPoint> apRepository, INavigationService navigationService)
+        public KeyCardEditPage(GenericAPIPoster<KeyCard> kcAPIPoster, GenericAPIPoster<AccessPoint> apAPIPoster, INavigationService navigationService)
         {
             InitializeComponent();
             DataContext = this;
@@ -53,8 +54,8 @@ namespace ACS.Views.EditPages
                 ExpirationDate = DateTime.UtcNow.AddDays(1),
             };
             ItemOrigin = null;
-            _kcRepository = kcRepository;
-            _apRepository = apRepository;
+            _kcAPIPoster = kcAPIPoster;
+            _apAPIPoster = apAPIPoster;
             _navigationService = navigationService;
             _cts = new CancellationTokenSource().Token;
         }
@@ -113,15 +114,15 @@ namespace ACS.Views.EditPages
             //track current entity
             if (ItemOrigin != null)
             {
-                Item = await _kcRepository.GetOneAsync(Item.Id, _cts);
+                Item = await _kcAPIPoster.GetOneAsync(Item.Id, _cts);
                 Item.Key = itemChanges.Key;
                 Item.ExpirationDate = itemChanges.ExpirationDate;
             }
             else
             {
-                 _kcRepository.Attach(Item);
+                 _kcAPIPoster.Attach(Item);
             }
-            await _kcRepository.SaveChangesAsync(_cts);
+            await _kcAPIPoster.SaveChangesAsync(_cts);
             _navigationService.GoBack();
         }
 
@@ -141,8 +142,8 @@ namespace ACS.Views.EditPages
         {
             if (MessageBox.Show("You sure you want to delete this?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                await _kcRepository.DeleteAsync(ItemOrigin.Id, _cts);
-                await _kcRepository.SaveChangesAsync(_cts);
+                await _kcAPIPoster.DeleteAsync(ItemOrigin.Id, _cts);
+                await _kcAPIPoster.SaveChangesAsync(_cts);
                 _navigationService.GoBack();
             }
         }

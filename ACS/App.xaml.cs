@@ -84,15 +84,15 @@ namespace ACS
 
             // Services
             //Repos
-            services.AddTransient<IGenericRepositoryAsync<User>, UserRepository>();
-            services.AddTransient<IGenericRepositoryAsync<KeyCard>, KeyCardRepository>();
-            services.AddTransient<IGenericRepositoryAsync<AccessPoint>, AccessPointRepository>();
-            services.AddTransient<IGenericRepositoryAsync<Camera>, CamerasRepository>();
-            services.AddTransient<IGenericRepositoryAsync<ParkingLot>, ParkingLotRepository>();
-            services.AddTransient<IGenericRepositoryAsync<AccessEvent>, AccessEventRepository>();
-            services.AddTransient<IGenericRepositoryAsync<FaceRecognizedEvent>, FaceRecognizedEventRepository>();
-            services.AddTransient<IGenericRepositoryAsync<ParkingLotStateChangedEvent>, ParkingLotStateChangedEventRepository>();
-            services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
+            services.AddTransient<GenericAPIPoster<User>>();
+            services.AddTransient<GenericAPIPoster<KeyCard>>();
+            services.AddTransient<GenericAPIPoster<AccessPoint>>();
+            services.AddTransient<GenericAPIPoster<Camera>>();
+            services.AddTransient<GenericAPIPoster<ParkingLot>>();
+            services.AddTransient<GenericAPIPoster<AccessEvent>>();
+            services.AddTransient<GenericAPIPoster<FaceRecognizedEvent>>();
+            services.AddTransient<GenericAPIPoster<ParkingLotStateChangedEvent>>();
+            services.AddTransient(typeof(GenericAPIPoster<>));
             //Others
             services.AddSingleton<IApplicationInfoService, ApplicationInfoService>();
             services.AddSingleton<ISystemService, SystemService>();

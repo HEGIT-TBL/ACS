@@ -11,7 +11,7 @@ namespace ACS.Core.Services.Repositories
 {
     public class CamerasRepository : GenericRepositoryAsync<Camera>
     {
-        public CamerasRepository(AccessControlDbContext context) : base(context)
+        public CamerasRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

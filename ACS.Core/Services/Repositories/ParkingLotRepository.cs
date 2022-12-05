@@ -11,7 +11,7 @@ namespace ACS.Core.Services.Repositories
 {
     public class ParkingLotRepository : GenericRepositoryAsync<ParkingLot>
     {
-        public ParkingLotRepository(AccessControlDbContext context) : base(context)
+        public ParkingLotRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

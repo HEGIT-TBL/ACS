@@ -7,21 +7,22 @@ using ACS.Contracts.Services;
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using ACS.Views.EditPages;
 
 namespace ACS.Views
 {
     public partial class UsersPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<User> _userRepository;
+        private readonly GenericAPIPoster<User> _userAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _ct;
 
         public ObservableCollection<User> Source { get; } = new ObservableCollection<User>();
 
-        public UsersPage(IGenericRepositoryAsync<User> userRepository, INavigationService navigationService)
+        public UsersPage(GenericAPIPoster<User> userAPIPoster, INavigationService navigationService)
         {
-            _userRepository = userRepository;
+            _userAPIPoster = userAPIPoster;
             _ct = new CancellationTokenSource().Token;
             _navigationService = navigationService;
             InitializeComponent();
@@ -33,7 +34,7 @@ namespace ACS.Views
             Source.Clear();
 
             // Replace this with your actual data
-            var data = await _userRepository.GetAllAsync(_ct);
+            var data = await _userAPIPoster.GetAllAsync(_ct);
 
             foreach (var item in data)
             {

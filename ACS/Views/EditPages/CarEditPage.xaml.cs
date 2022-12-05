@@ -1,7 +1,7 @@
 ﻿using ACS.Contracts.Services;
 using ACS.Contracts.Views;
-using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -13,7 +13,7 @@ namespace ACS.Views.EditPages
 {
     public partial class CarEditPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<User> _userRepository;
+        private readonly GenericAPIPoster<User> _userAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
@@ -50,14 +50,14 @@ namespace ACS.Views.EditPages
         }
         private Car _itemOrigin;
 
-        public CarEditPage(IGenericRepositoryAsync<User> userRepository, INavigationService navigationService)
+        public CarEditPage(GenericAPIPoster<User> userAPIPoster, INavigationService navigationService)
         {
             InitializeComponent();
             DataContext = this;
             Item = new Car();
             ItemOrigin = null;
 
-            _userRepository = userRepository;
+            _userAPIPoster = userAPIPoster;
             _navigationService = navigationService;
             _cts = new CancellationTokenSource().Token;
         }
@@ -65,7 +65,7 @@ namespace ACS.Views.EditPages
         public async void OnNavigatedTo(object parameter)
         {
             var tuple = ((User, Car))parameter;
-            ItemParent = await _userRepository.GetOneAsync(tuple.Item1.Id, _cts) ?? tuple.Item1;
+            ItemParent = await _userAPIPoster.GetOneAsync(tuple.Item1.Id, _cts) ?? tuple.Item1;
             if (tuple.Item2 != null)
             {
                 Item = tuple.Item2;
@@ -119,8 +119,8 @@ namespace ACS.Views.EditPages
                 editedCar.CarModel = Item.CarModel;
             }
 
-            _userRepository.Update(ItemParent);
-            await _userRepository.SaveChangesAsync(_cts);
+            _userAPIPoster.Update(ItemParent);
+            await _userAPIPoster.SaveChangesAsync(_cts);
             _navigationService.NavigateDoubleRemoveBackEntryTo(typeof(UserEditPage), (ItemParent, isNavigatedFromCars: true));
         }
 
@@ -142,8 +142,8 @@ namespace ACS.Views.EditPages
             if (MessageBox.Show("You sure you want to delete this?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 ItemParent.OwnedCars.RemoveAll(item => item.Id == Item.Id);
-                _userRepository.Update(ItemParent);
-                await _userRepository.SaveChangesAsync(_cts);
+                _userAPIPoster.Update(ItemParent);
+                await _userAPIPoster.SaveChangesAsync(_cts);
                 _navigationService.NavigateDoubleRemoveBackEntryTo(typeof(UserEditPage), (ItemParent, isNavigatedFromCars: true));
             }
         }

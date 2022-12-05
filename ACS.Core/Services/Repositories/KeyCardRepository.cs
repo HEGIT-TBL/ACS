@@ -10,7 +10,7 @@ namespace ACS.Core.Services.Repositories
 {
     public class KeyCardRepository : GenericRepositoryAsync<KeyCard>
     {
-        public KeyCardRepository(AccessControlDbContext context) : base(context)
+        public KeyCardRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

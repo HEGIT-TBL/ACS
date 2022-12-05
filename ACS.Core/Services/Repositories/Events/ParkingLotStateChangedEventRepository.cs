@@ -11,7 +11,7 @@ namespace ACS.Core.Services.Repositories.Events
 {
     public class ParkingLotStateChangedEventRepository : GenericRepositoryAsync<ParkingLotStateChangedEvent>
     {
-        public ParkingLotStateChangedEventRepository(AccessControlDbContext context) : base(context)
+        public ParkingLotStateChangedEventRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

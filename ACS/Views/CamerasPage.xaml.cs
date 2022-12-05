@@ -7,23 +7,24 @@ using ACS.Contracts.Services;
 using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
+using ACS.Services;
 using ACS.Views.EditPages;
 
 namespace ACS.Views
 {
     public partial class CamerasPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<Camera> _camerasRepository;
+        private readonly GenericAPIPoster<Camera> _camerasAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _cts;
 
         public ObservableCollection<Camera> Source { get; } = new ObservableCollection<Camera>();
 
 
-        public CamerasPage(IGenericRepositoryAsync<Camera> camerasRepository, INavigationService navigationService)
+        public CamerasPage(GenericAPIPoster<Camera> camerasAPIPoster, INavigationService navigationService)
         {
             _cts = new CancellationTokenSource().Token;
-            _camerasRepository = camerasRepository;
+            _camerasAPIPoster = camerasAPIPoster;
             _navigationService = navigationService;
             InitializeComponent();
             DataContext = this;
@@ -33,7 +34,7 @@ namespace ACS.Views
         {
             Source.Clear();
 
-            var data = await _camerasRepository.GetAllAsync(_cts);
+            var data = await _camerasAPIPoster.GetAllAsync(_cts);
 
             foreach (var item in data)
             {

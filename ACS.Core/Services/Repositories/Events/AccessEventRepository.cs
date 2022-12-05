@@ -11,7 +11,7 @@ namespace ACS.Core.Services.Repositories.Events
 {
     public class AccessEventRepository : GenericRepositoryAsync<AccessEvent>
     {
-        public AccessEventRepository(AccessControlDbContext context) : base(context)
+        public AccessEventRepository(IDbContextFactory<AccessControlDbContext> context) : base(context)
         {
         }
 

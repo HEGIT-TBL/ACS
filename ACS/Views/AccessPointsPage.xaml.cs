@@ -8,20 +8,21 @@ using ACS.Contracts.Views;
 using ACS.Core.Contracts.Services;
 using ACS.Core.Models;
 using ACS.Helpers;
+using ACS.Services;
 using ACS.Views.EditPages;
 
 namespace ACS.Views
 {
     public partial class AccessPointsPage : Page, INotifyPropertyChanged, INavigationAware
     {
-        private readonly IGenericRepositoryAsync<AccessPoint> _accessPointRepository;
+        private readonly GenericAPIPoster<AccessPoint> _accessPointAPIPoster;
         private readonly INavigationService _navigationService;
         private readonly CancellationToken _ct;
         public ObservableCollection<AccessPoint> Source { get; } = new ObservableCollection<AccessPoint>();
         
-        public AccessPointsPage(IGenericRepositoryAsync<AccessPoint> accessPointRepository,INavigationService navigationService)
+        public AccessPointsPage(GenericAPIPoster<AccessPoint> accessPointAPIPoster,INavigationService navigationService)
         {
-            _accessPointRepository = accessPointRepository;
+            _accessPointAPIPoster = accessPointAPIPoster;
             _navigationService = navigationService;
             _ct = new CancellationTokenSource().Token;
             InitializeComponent();
@@ -32,7 +33,7 @@ namespace ACS.Views
         {
             Source.Clear();
 
-            var data = await _accessPointRepository.GetAllAsync(_ct);
+            var data = await _accessPointAPIPoster.GetAllAsync(_ct);
 
             foreach (var item in data)
             {
